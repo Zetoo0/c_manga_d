@@ -1,4 +1,6 @@
 import requests
+import re
+import itertools
 import sys
 import os
 import io
@@ -6,6 +8,8 @@ from PIL import Image
 import climage
 import time
 import manga
+from dotenv import load_dotenv,set_key
+load_dotenv()
 #Now you can only download chapters for you given manga
 #but later my idea that it'll list you mangas by 
 #search and then you can select one of them
@@ -31,11 +35,26 @@ url = "https://api.mangadex.org"
   #  print(chapter["attributes"]["chapter"])
 #print(chapterList["data"][0]["attributes"]["chapter"])
 
+
+
+
 #include = ["Action"]
 #exclude = ["Harem"]
 #asd = manga_wtf.Manga.getMangasWithIncludedAndExcludedTags(include,exclude,"en")
 #namaes = [chapter["attributes"]["title"]["en"] for chapter in asd["data"]]
-while True:
-  rand_manga = manga.Manga.getRandomManga()
-  print(rand_manga["data"]["attributes"]["title"]["en"])
-  time.sleep(0.1)
+
+
+secret = os.getenv("SECRET_KEY")
+personal_key = os.getenv("CLIENT_KEY")
+username = os.getenv("USERNAME")
+pw = os.getenv("PASSWORD")
+
+acc_tok,refr_tok = manga.Manga.authenticate(personal_key,secret,username,pw)
+
+
+#print(f'Access Token: {acc_tok} - Refresh Token: {refr_tok}')
+#print(manga.Manga.addMangaToReadList("Gintama",acc_tok,"reading"))
+
+
+
+

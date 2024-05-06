@@ -2,9 +2,12 @@ import requests
 import os
 import sys
 import time
+import tkinter as tk
+from PIL import ImageTk,Image
 
 class Manga:
-    baseurl = "https://api.mangadex.dev"
+    baseurl = "https://api.mangadex.org"
+    authurh = "https://auth.mangadex.org/realms/mangadex/protocol/openid-connect/token"
     title : str
     
     def __init__(self,title):
@@ -17,6 +20,11 @@ class Manga:
             params={"title": title,"offset": 0},
         )
         return resp.json()
+    
+    @staticmethod
+    def getMangaId(title):
+        resp = requests.get(f'{Manga.baseurl}/manga',params={"title" : title,"offset" : 0})
+        return resp.json()["data"][0]["id"]
 
     @staticmethod
     def getChapters(id,currOfs):
@@ -28,18 +36,17 @@ class Manga:
         chaptersResp = requests.get(
             f'{Manga.baseurl}/manga/{id}/feed',
             params={"translatedLanguage[]": "en","limit":20,"offset":currOfs},
-       ) 
+       )    
         #print(chaptersResp.json())   
         return chaptersResp.json()
-    
 
     @staticmethod
     def startDownloadAndSaveAllChapter(title):
-        resp = requests.get(
-            f"{Manga.baseurl}/manga",
-            params={"title": title},
-        )
-        _id = resp.json()["data"][0]["id"]
+        #resp = requests.get(
+         #   f"{Manga.baseurl}/manga",
+          #  params={"title": title},
+        #)"""
+        _id = Manga.getMangaId(title)
         chapters = Manga.getChaptersNormallyWithPaginationUwU(_id)
         ch_len = len(chapters)
 
@@ -107,3 +114,53 @@ class Manga:
     def getRandomManga():
         manga = requests.get(f'{Manga.baseurl}/manga/random').json()
         return manga
+
+    @staticmethod
+    def authenticate(client_key,secret_key,username,passw):
+        credentials = {"grant_type" : "password","username" : username,"password" : passw,"client_id" : client_key,"client_secret" : secret_key}
+        resp = requests.post(Manga.authurh,data=credentials).json()
+        return (resp["access_token"],resp["refresh_token"])
+    
+    @staticmethod
+    def addMangaToReadList(manga,token,status):
+        id = Manga.getMangaId(manga)
+        print(id)
+        resp = requests.post(f'{Manga.baseurl}/manga/{id}/status',headers={"Authorization" : f'Bearer {token}'},json = {"status" : status})
+        print(f'Response: {resp.json()["result"]}')
+        print(f'Successfully added manga to reading list: {manga} - {status}')
+
+    @staticmethod
+    def followManga(manga,token):
+        id = Manga.getMangaId(manga)
+        resp = requests.post(f'{Manga.baseurl}/manga/{id}/follow',headers={"Authorization" : f'Bearer {token}'})
+
+    @staticmethod
+    def createCustomList(token,listName,visibility):
+        options = {"name" : listName,"visibility" : visibility}
+        resp = requests.post(f'{Manga.baseurl}/list',headers={"Authorization" : f'Bearer {token}'},json=options)
+        print(f'{listName} created')
+        return resp.json()["data"]["id"]#Maybe I could save into a json file? TODO
+    
+    @staticmethod
+    def addMangaToCustomList(token,list_id,mangaAdd):
+        mangaAdd = Manga.getMangaId(mangaAdd)
+        resp = requests.post(f'{Manga.baseurl}/list/{list_id}',headers = {"Authorization" : f'Bearer {token}'})
+        version = resp.json()["data"]["attributes"]["version"]
+
+        r_put = requests.put(f'{Manga.baseurl}/list/{list_id}',headers={"Authorization" : f'Bearer {token}'},json={"manga":mangaAdd,"version" : version})
+
+    @staticmethod
+    def removeMangaFromCustomList(token,list_id,mangaRemove):
+        mangaRemove = Manga.getMangaId(mangaRemove)
+        resp = requests.post(f'{Manga.baseurl}/list/{list_id}',headers = {"Authorization" : f'Bearer {token}'})
+        version = resp.json()["data"]["attributes"]["version"]
+        r_put = requests.put(f'{Manga.baseurl}/list/{list_id}',headers={"Authorization" : f'Bearer {token}'},json={"manga" : mangaRemove, "version":version})
+
+
+    @staticmethod
+    def getReadingListByStatus(token,status):
+        resp = requests.get(f'{Manga.baseurl}/status',headers={"Authorization" : f'Bearer {token}'},json={"status":status})
+        print(resp)
+
+
+#very big TODO make a manga reader with tkinter(?) or with c++/rust and with a command it's open it after that you can read the manga or its open the whole manga library of the user and the user can pick one and read
