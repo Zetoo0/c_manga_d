@@ -10,3 +10,4 @@ To-Do list:
  - read
  - auth and login ✔️
  - update downloaded chapters 💀
+ - tests
