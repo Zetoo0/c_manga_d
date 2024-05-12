@@ -23,7 +23,9 @@ class Manga:
     
     @staticmethod
     def getMangaId(title):
-        resp = requests.get(f'{Manga.baseurl}/manga',params={"title" : title,"offset" : 0})
+        print("Kapott title: " + title)
+        resp = requests.get(f'{Manga.baseurl}/manga',params={"title" : title.lower(),"offset" : 0})
+        print("Manga Id: ",resp.json()["data"][0])    
         return resp.json()["data"][0]["id"]
 
     @staticmethod
@@ -32,6 +34,7 @@ class Manga:
         Get the chapters with offset 20
         """
         languages = ["en"]
+        print(f"offset:{currOfs}")
         #manga = Manga.getManga(title)
         chaptersResp = requests.get(
             f'{Manga.baseurl}/manga/{id}/feed',
@@ -48,24 +51,32 @@ class Manga:
         #)"""
         _id = Manga.getMangaId(title)
         chapters = Manga.getChaptersNormallyWithPaginationUwU(_id)
+        #print(chapters[0])
+        print("----------------------------------")
+        #print(chapters[0][1])
         ch_len = len(chapters)
-
-        for i in range(ch_len):
-            os.makedirs(f"{title}/{i}",exist_ok=True)
-            #print(chapters[i]["id"])
-            resp = requests.get(f"{Manga.baseurl}/at-home/server/{chapters[i]['id']}")
-            host = resp.json()["baseUrl"]
-            hash = resp.json()["chapter"]["hash"]
-            dat_saver = resp.json()["chapter"]["data"]
-            print(hash)
-        # print(dat_saver)
-            for page in dat_saver:
-                img = requests.get(f"{host}/data/{hash}/{page}")
-            #  img_pil = Image.open(io.BytesIO(img.content))
-                ch_path = f"{title}/{i}/{page}"
-            #    img_pil.save(ch_path)
-                with open(ch_path, mode="wb") as f:
-                    f.write(img.content)        
+        ii = 0
+        for downloaded in chapters:
+            for chapter in downloaded:
+                print("For?,")
+                os.makedirs(f"{title}/{ii}",exist_ok=True)
+                #print(chapters[i]["id"])
+                resp = requests.get(f"{Manga.baseurl}/at-home/server/{chapter['id']}")
+                host = resp.json()["baseUrl"]
+                hash = resp.json()["chapter"]["hash"]
+                dat_saver = resp.json()["chapter"]["data"]
+                print(hash)
+            # print(dat_saver)
+                for page in dat_saver:
+                    print("for real")
+                    img = requests.get(f"{host}/data/{hash}/{page}")
+                #  img_pil = Image.open(io.BytesIO(img.content))
+                    ch_path = f"{title}/{ii}/{page}"
+                #    img_pil.save(ch_path)
+                    with open(ch_path, mode="wb") as f:
+                        print("Irni kellene a képet????")
+                        f.write(img.content)
+                ii+=1        
 
     @staticmethod
     def getMangasWithIncludedAndExcludedTags(includeT,excludeT,lang):
@@ -75,7 +86,7 @@ class Manga:
         tags = requests.get(f'{Manga.baseurl}/manga/tag').json()
         included_ids = [tag["id"] for tag in tags["data"] if tag["attributes"]["name"]["en"] in includeT]
         excluded_ids = [tag["id"] for tag in tags["data"] if tag["attributes"]["name"]["en"] in excludeT]
-
+ 
         filter = {
             'includedTags[]' : included_ids, 
             'excludedTags[]' : excluded_ids,
@@ -101,6 +112,7 @@ class Manga:
         offset = 0
         pageList = []
         pagedCh = Manga.getChapters(id,offset)
+        print(pagedCh)
         while len(pagedCh['data']) > 0:
             print(pagedCh["data"])
             pageList.append(pagedCh['data'])
@@ -117,8 +129,10 @@ class Manga:
 
     @staticmethod
     def authenticate(client_key,secret_key,username,passw):
+        print(username,passw)
         credentials = {"grant_type" : "password","username" : username,"password" : passw,"client_id" : client_key,"client_secret" : secret_key}
         resp = requests.post(Manga.authurh,data=credentials).json()
+        print(resp)
         return (resp["access_token"],resp["refresh_token"])
     
     @staticmethod
