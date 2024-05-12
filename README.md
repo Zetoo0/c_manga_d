@@ -8,5 +8,6 @@ The project is in early-dev phase
 
 To-Do list:
  - read
- - auth and login
- - update downloaded chapters
+ - auth and login ✔️
+ - update downloaded chapters 💀
+ - tests
