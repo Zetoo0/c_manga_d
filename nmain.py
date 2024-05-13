@@ -24,15 +24,12 @@ class MangaCLI(argparse.Action):
         
         setattr(namespace,self.dest,values)
 
-    def read(arg):
-        print("????")
+    def read(arg,datas):
+        print(datas)
         root = tk.Tk()
         root.title("Manga Reader")
         root.geometry("1920x1080")
-        #root.grid_rowconfigure(0, weight=1)
-        #root.grid_columnconfigure(0, weight=1)
-
-        app = reader.MangaReader(master=root)
+        app = reader.MangaReader(name=datas[0],master=root)#test maybe not good xd
         app.mainloop()
 
     def addToFixedList(arg):
@@ -69,7 +66,7 @@ else:
 #print(acc_token,refresh_token)
 parser = argparse.ArgumentParser()
 parser.add_argument('-m', '--manga',action=MangaCLI)
-parser.add_argument('-r', '--read',action=MangaCLI)
+parser.add_argument('-r', '--read',action=MangaCLI,nargs=1)
 parser.add_argument('-rm', '--randommanga',action=MangaCLI,help="Get Random Manga",nargs=0)
 parser.add_argument('-dw','--download',action=MangaCLI)
 
