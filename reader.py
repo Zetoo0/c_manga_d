@@ -10,7 +10,7 @@ class MangaReader(tk.Frame):
         self.master = master
         self.ch = ch-1
         self.name = name
-        self.listbox = Listbox(self,bg='yellow')
+        self.listbox = Listbox(self)
         self.listbox.grid(row=0, column=11, sticky="nsew")
         self.listbox.bind('<Double-1>',self.printnum)
         self.load_into_listbox()

@@ -8,24 +8,26 @@ from PIL import Image
 
 class MangaCLI(argparse.Action):
     def __call__(self,parser,namespace,values,option_str=None):
-        #print(f'Value:{values} - Option: {option_str}')
+        print(option_str)
         if(option_str == '-rm' or option_str == '--randommanga'):
             self.getRandomManga()
         elif(option_str == '-r' or option_str == '--read'):
-            #print("Micsipicsi")
-            self.read(values)
+            namae = " ".join([val for val in values])
+            self.read(namae)
         elif(option_str == '-m' or option_str == '--manga'):
             self.mangatest()
-            #print("vasút")
-            #self.read()
         elif(option_str == '-dw' or option_str == '--download'):
-            self.downloadAllChapter(values)
-        
+            namae = " ".join([val for val in values])
+            self.downloadAllChapter(namae)
+        elif(option_str == '-upd' or option_str == '--updatemanga'):
+            print("update???")
+            namae = " ".join([val for val in values])
+            self.downloadNewestChapter(namae)
         
         setattr(namespace,self.dest,values)
 
     def read(arg,datas):
-        print(datas)
+        print("Opening manga: ",datas[0])
         root = tk.Tk()
         root.title("Manga Reader")
         root.geometry("1920x1080")
@@ -41,8 +43,13 @@ class MangaCLI(argparse.Action):
         pass
 
     def downloadAllChapter(arg,name):
+        #print(name)
         print(f"Download {name} manga...")
         manga.Manga.startDownloadAndSaveAllChapter(name)
+
+    def downloadNewestChapter(arg,name):
+        print(f'Update {name} manga...')
+        manga.Manga.downloadLatestChapter(name)
 
     def getRandomManga(arg):
         print(manga.Manga.getRandomManga()["data"]["attributes"]["title"]["en"])
@@ -64,15 +71,11 @@ else:
     acc_token,refresh_token = auth(user_n,pw,client_key,secret_key)
     print("Access token successfully arrived")
 #print(acc_token,refresh_token)
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser()  
 parser.add_argument('-m', '--manga',action=MangaCLI)
-parser.add_argument('-r', '--read',action=MangaCLI,nargs=1)
+parser.add_argument('-r', '--read',action=MangaCLI)
 parser.add_argument('-rm', '--randommanga',action=MangaCLI,help="Get Random Manga",nargs=0)
-parser.add_argument('-dw','--download',action=MangaCLI)
+parser.add_argument('-dw','--download',action=MangaCLI,nargs='+')
+parser.add_argument('-upd','--updatemanga',action=MangaCLI,nargs='+')
 
 args = parser.parse_args()
-
-#print(args)
-
-
-

@@ -48,18 +48,52 @@ class Manga:
        )    
         print(chaptersResp.json())   
         return chaptersResp.json()
+    
+    def getLatestChapter(id):
+        """
+        Get the latest chapter
+        """
+        #manga = Manga.getManga(title)
+        chaptersResp = requests.get(
+            f'{Manga.baseurl}/manga/{id}/feed',
+            params={"translatedLanguage[]": "en","order[chapter]":"desc","limit":1},
+       )    
+        print(chaptersResp.json())   
+        return chaptersResp.json()
+
+    @staticmethod
+    def downloadLatestChapter(title):
+        _id = Manga.getMangaId(title)
+        print("id: ",_id)
+        chapter = Manga.getLatestChapter(_id)
+        chapterlen = len(os.listdir(title))
+        os.makedirs(f"{title}/{chapterlen}",exist_ok=True)
+                #print(chapters[i]["id"])
+        print("-----------------------------")
+        print(chapter['data'][0]['id'])
+        resp = requests.get(f"{Manga.baseurl}/at-home/server/{chapter['data'][0]['id']}")
+        host = resp.json()["baseUrl"]
+        hash = resp.json()["chapter"]["hash"]
+        dat_saver = resp.json()["chapter"]["data"]
+        print(hash)
+            # print(dat_saver)
+        pagei = 0
+        for page in dat_saver:
+            print("for real")
+            img = requests.get(f"{host}/data/{hash}/{page}")
+                #  img_pil = Image.open(io.BytesIO(img.content))
+            ch_path = f"{title}/{chapterlen}/{pagei}.png"
+                #    img_pil.save(ch_path)
+            with open(ch_path, mode="wb") as f:
+                print("Irni kellene a képet????")
+                f.write(img.content)
+                pagei+=1        
 
     @staticmethod
     def startDownloadAndSaveAllChapter(title):
-        #resp = requests.get(
-         #   f"{Manga.baseurl}/manga",
-          #  params={"title": title},
-        #)"""
         _id = Manga.getMangaId(title)
         chapters = Manga.getChaptersNormallyWithPaginationUwU(_id)
-        #print(chapters[0])
         print("----------------------------------")
-        #print(chapters[0][1])
         ch_len = len(chapters)
         ii = 0
         for downloaded in chapters:
