@@ -7,7 +7,8 @@ Idea:
 The project is in early-dev phase
 
 To-Do list:
- - read
+ - read✔️
  - auth and login ✔️
- - update downloaded chapters 💀
+ - update downloaded chapters ✔️
+ - TTS(Text To Speech) feature into the reader
  - tests
