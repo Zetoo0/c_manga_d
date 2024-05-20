@@ -4,6 +4,7 @@ import sys
 import time
 import tkinter as tk
 from PIL import ImageTk,Image
+import pytesseract
 
 class ChapterOrder:
     def __init__(self,chapter):
@@ -38,8 +39,8 @@ class Manga:
         """
         Get the chapters with offset 20
         """
-        languages = ["en"]
-        order = ChapterOrder("asc")
+        #languages = ["en"]
+       # order = ChapterOrder("asc")
         print(f"offset:{currOfs}")
         #manga = Manga.getManga(title)
         chaptersResp = requests.get(
@@ -49,6 +50,7 @@ class Manga:
         print(chaptersResp.json())   
         return chaptersResp.json()
     
+
     def getLatestChapter(id):
         """
         Get the latest chapter
@@ -192,6 +194,57 @@ class Manga:
         resp = requests.post(f'{Manga.baseurl}/manga/{id}/follow',headers={"Authorization" : f'Bearer {token}'})
 
     @staticmethod
+    def rateManga(manga,token,rate):
+        """
+        Rate manga from 1-10
+        """
+        id = Manga.getMangaId(manga)
+        resp = requests.post(f'{Manga.baseurl}/rating/{id}',headers={'Authorization' : f'Bearer {token}'},json={"rating" : rate})
+        return resp
+    
+    @staticmethod
+    def getMyRatings(token):
+        resp = requests.get(f'{Manga.baseurl}/rating',headers={"Authorization" : f'Bearer {token}'})
+        return resp
+
+    @staticmethod
+    def deleteRating(manga,token):
+        id = Manga.getMangaId(manga)
+        resp = requests.delete(f'{Manga.baseurl}/rating/{id}',headers={'Authorization' : f'Bearer {token}'})
+
+    @staticmethod
+    def getReadingList(token):
+        resp = requests.get(f'{Manga.baseurl}/list',headers={"Authorization" : f'Bearer {token}'})
+        print(resp)
+
+    @staticmethod
+    def getMangaReadingStatus(token,manga):
+        id = Manga.getMangaId(manga)
+        resp = requests.get(f'{Manga.baseurl}/manga/{id}/status',headers={"Authorization" : f'Bearer {token}'})
+        return resp['data']
+
+    @staticmethod
+    def getMangaVolsAndChapters(manga):
+        id = Manga.getMangaId(manga)
+        resp = requests.get(f'{Manga.baseurl}/manga/{id}/aggregate')
+        print(resp)
+
+    @staticmethod
+    def getMangaRelationList(manga):
+        id = Manga.getMangaId(manga)
+        resp = requests.get(f'{Manga.baseurl}/manga/{id}/relation')
+
+    @staticmethod
+    def getReadingHistory(token):
+        resp = requests.get(f'{Manga.baseurl}/user/history', headers={"Authorization" : f'Bearer {token}'})
+        return resp
+
+    @staticmethod
+    def getUserDetails(token):
+        resp = requests.get(f'{Manga.baseurl}/user/me',headers={"Authorization" : f'Bearer {token}'})
+        return resp
+
+    @staticmethod
     def createCustomList(token,listName,visibility):
         options = {"name" : listName,"visibility" : visibility}
         resp = requests.post(f'{Manga.baseurl}/list',headers={"Authorization" : f'Bearer {token}'},json=options)
@@ -199,13 +252,16 @@ class Manga:
         return resp.json()["data"]["id"]#Maybe I could save into a json file? TODO
     
     @staticmethod
+    def getLoggedUserCustomList(token):
+        resp = requests.get(f'{Manga.baseurl}/user/list',headers={"Authorization" : f'Bearer {token}'})
+        return resp
+    @staticmethod
     def addMangaToCustomList(token,list_id,mangaAdd):
         mangaAdd = Manga.getMangaId(mangaAdd)
         resp = requests.post(f'{Manga.baseurl}/list/{list_id}',headers = {"Authorization" : f'Bearer {token}'})
         version = resp.json()["data"]["attributes"]["version"]
-
         r_put = requests.put(f'{Manga.baseurl}/list/{list_id}',headers={"Authorization" : f'Bearer {token}'},json={"manga":mangaAdd,"version" : version})
-
+        print(r_put)
     @staticmethod
     def removeMangaFromCustomList(token,list_id,mangaRemove):
         mangaRemove = Manga.getMangaId(mangaRemove)
@@ -216,8 +272,7 @@ class Manga:
 
     @staticmethod
     def getReadingListByStatus(token,status):
-        resp = requests.get(f'{Manga.baseurl}/status',headers={"Authorization" : f'Bearer {token}'},json={"status":status})
+        resp = requests.get(f'{Manga.baseurl}/manga/status',headers={"Authorization" : f'Bearer {token}'},json={"status":status})
         print(resp)
-
-
-#very big TODO make a manga reader with tkinter(?) or with c++/rust and with a command it's open it after that you can read the manga or its open the whole manga library of the user and the user can pick one and read
+    
+    

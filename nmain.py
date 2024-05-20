@@ -23,6 +23,12 @@ class MangaCLI(argparse.Action):
             print("update???")
             namae = " ".join([val for val in values])
             self.downloadNewestChapter(namae)
+        elif(option_str == '-addtolist'):
+            namae = " ".join([val for val in values])
+            self.addToList(namae)
+        elif(option_str == '-addtocustom'):
+            namae = " ".join([val for val in values])
+            self.addToCustomList(namae)
         
         setattr(namespace,self.dest,values)
 
@@ -34,13 +40,26 @@ class MangaCLI(argparse.Action):
         app = reader.MangaReader(name=datas[0],master=root)#test maybe not good xd
         app.mainloop()
 
-    def addToFixedList(arg):
-        pass
+    def rateManga(arg,name):
+        print("Rate manga: ")
+        rate = input()
+        manga.Manga.rateManga(manga=name,rate=rate,token=acc_token)
 
+    def followManga(arg,name):
+        manga.Manga.followManga(name,acc_token)
     def mangatest(arg,nam):
         print(nam)
-    def addToCustomList(arg):
-        pass
+      
+
+    def addToList(arg,name):
+        print("press (r) for readlist\n(p) for plan to read\n(o) for on hold\n(d) for dropped\n(r) for re-read\n(c) for completed")
+        inputka = input()
+        manga.Manga.addMangaToReadList(name,acc_token,statuses[inputka])
+
+    def addToCustomList(arg,name):
+        print("Custom list name:")
+        inputk = input()
+        manga.Manga.addMangaToCustomList(acc_token,inputk,name)
 
     def downloadAllChapter(arg,name):
         #print(name)
@@ -60,6 +79,7 @@ class MangaCLI(argparse.Action):
 def auth(username,pw,clientkey,secretkey):
     return manga.Manga.authenticate(username=username,passw=pw,client_key=clientkey,secret_key=secretkey)
 
+statuses = {'c':'completed', 'p' : 'plan_to_read', 'o' : 'on_hold', 'd' : 'dropped', 'r' : 're_reading'}
 load_dotenv(".env")
 user_n = os.getenv("UNAME")
 pw = os.getenv("PASSWORD")
@@ -72,10 +92,17 @@ else:
     print("Access token successfully arrived")
 #print(acc_token,refresh_token)
 parser = argparse.ArgumentParser()  
+
+
 parser.add_argument('-m', '--manga',action=MangaCLI)
 parser.add_argument('-r', '--read',action=MangaCLI)
 parser.add_argument('-rm', '--randommanga',action=MangaCLI,help="Get Random Manga",nargs=0)
 parser.add_argument('-dw','--download',action=MangaCLI,nargs='+')
 parser.add_argument('-upd','--updatemanga',action=MangaCLI,nargs='+')
+parser.add_argument('-rate','--ratemanga',action=MangaCLI,nargs='+')
+parser.add_argument('-addtolist','--attest',action=MangaCLI,nargs='+')
+parser.add_argument('-addtocustom','--aztest',action=MangaCLI,nargs='+')
+
+
 
 args = parser.parse_args()
