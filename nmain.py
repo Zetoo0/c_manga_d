@@ -32,12 +32,12 @@ class MangaCLI(argparse.Action):
         
         setattr(namespace,self.dest,values)
 
-    def read(arg,datas):
-        print("Opening manga: ",datas[0])
+    def read(arg,name):
+        print("Opening manga: ",name)
         root = tk.Tk()
         root.title("Manga Reader")
         root.geometry("1920x1080")
-        app = reader.MangaReader(name=datas[0],master=root)#test maybe not good xd
+        app = reader.MangaReader(name=name,master=root)#test maybe not good xd
         app.mainloop()
 
     def rateManga(arg,name):
@@ -95,7 +95,7 @@ parser = argparse.ArgumentParser()
 
 
 parser.add_argument('-m', '--manga',action=MangaCLI)
-parser.add_argument('-r', '--read',action=MangaCLI)
+parser.add_argument('-r', '--read',action=MangaCLI,nargs='+')
 parser.add_argument('-rm', '--randommanga',action=MangaCLI,help="Get Random Manga",nargs=0)
 parser.add_argument('-dw','--download',action=MangaCLI,nargs='+')
 parser.add_argument('-upd','--updatemanga',action=MangaCLI,nargs='+')
