@@ -14,7 +14,7 @@ To-Do list:
  - update downloaded chapters ✔️
  - add manga rating ✔️
  - add manga to custom lists and libraries(readlist, completed etc)✔️
- - cannot read long chapters because the canvas cut them 
+ - cannot read long chapters because the canvas cut them -> paging
  - TTS(Text To Speech) feature into the reader
  - tests
  - setup and "tutorial"
