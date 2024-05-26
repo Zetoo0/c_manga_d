@@ -1,6 +1,6 @@
 # c_manga_d
 
-CMD manga download and reader using Mangadex API
+CLI manga download and reader using Mangadex API
 But you can manage more thing such as read list, rating etc
 
 
