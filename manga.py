@@ -4,7 +4,8 @@ import sys
 import time
 import tkinter as tk
 from PIL import ImageTk,Image
-import pytesseract
+import concurrent.futures
+#import pytesseract
 
 class ChapterOrder:
     def __init__(self,chapter):
@@ -97,9 +98,17 @@ class Manga:
         chapters = Manga.getChaptersNormallyWithPaginationUwU(_id)
         print("----------------------------------")
         ch_len = len(chapters)
-        ii = 0
-        for downloaded in chapters:
-            for chapter in downloaded:
+        
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            futures = []
+            for ii,downloaded in enumerate(chapters):
+                futures.append(executor.submit(Manga.downloadChapter,title,downloaded,ii))
+            for future in concurrent.futures.as_completed(futures):
+                future.result()
+
+    @staticmethod
+    def downloadChapter(title,downloaded,ii):
+        for chapter in downloaded:
                 print("For?,")
                 os.makedirs(f"{title}/{ii}",exist_ok=True)
                 #print(chapters[i]["id"])
@@ -120,7 +129,7 @@ class Manga:
                         print("Irni kellene a képet????")
                         f.write(img.content)
                     pagei+=1
-                ii+=1        
+                ii+=1
 
     @staticmethod
     def getMangasWithIncludedAndExcludedTags(includeT,excludeT,lang):
@@ -144,8 +153,8 @@ class Manga:
     def getMangasWithStatusAndPublicationDemographic(status, publicationDemographic):
         """
         Get the mangas with status and publication demographic
-        publication demographics are: shounen, seinen, shoujo, josei
-        manga statuses are: completed, ongoing, cancelled, hiatus
+        publication demographics: shounen, seinen, shoujo, josei
+        manga status: completed, ongoing, cancelled, hiatus
         """
         #TODO
         #resp = requests.get(f'{Manga.baseurl}/manga'"""params={'status' : status, 'publicationDemographic' : publicationDemographic}""")
@@ -237,7 +246,8 @@ class Manga:
     @staticmethod
     def getReadingHistory(token):
         resp = requests.get(f'{Manga.baseurl}/user/history', headers={"Authorization" : f'Bearer {token}'})
-        return resp
+       ##print(resp.json()[])
+        return resp.json()
 
     @staticmethod
     def getUserDetails(token):
@@ -273,6 +283,11 @@ class Manga:
     @staticmethod
     def getReadingListByStatus(token,status):
         resp = requests.get(f'{Manga.baseurl}/manga/status',headers={"Authorization" : f'Bearer {token}'},json={"status":status})
-        print(resp)
+        print(resp)#TODO
     
+    @staticmethod
+    def getMangaBayesianRating(manga):
+        _id = Manga.getMangaId(manga)
+        resp = requests.get(f'{Manga.baseurl}/statistics/manga', json={"manga" : _id})
+        return  resp.json()["statistics"][_id]["rating"]["bayesian"]
     

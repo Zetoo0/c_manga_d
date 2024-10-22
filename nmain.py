@@ -29,6 +29,11 @@ class MangaCLI(argparse.Action):
         elif(option_str == '-addtocustom'):
             namae = " ".join([val for val in values])
             self.addToCustomList(namae)
+        elif(option_str == '-rate' or option_str == '--ratemanga'):
+            namae = " ".join([val for val in values])
+            self.rateManga(namae)
+        elif(option_str == '-readhistory' or option_str == '--rh'):
+            self.getReadingHistory()
         
         setattr(namespace,self.dest,values)
 
@@ -73,6 +78,9 @@ class MangaCLI(argparse.Action):
     def getRandomManga(arg):
         print(manga.Manga.getRandomManga()["data"]["attributes"]["title"]["en"])
 
+    def getReadingHistory(arg):
+        print(manga.Manga.getReadingHistory(acc_token)["data"])
+
     def readListByStatus(arg):
         pass
 
@@ -93,7 +101,6 @@ else:
 #print(acc_token,refresh_token)
 parser = argparse.ArgumentParser()  
 
-
 parser.add_argument('-m', '--manga',action=MangaCLI)
 parser.add_argument('-r', '--read',action=MangaCLI,nargs='+')
 parser.add_argument('-rm', '--randommanga',action=MangaCLI,help="Get Random Manga",nargs=0)
@@ -102,7 +109,6 @@ parser.add_argument('-upd','--updatemanga',action=MangaCLI,nargs='+')
 parser.add_argument('-rate','--ratemanga',action=MangaCLI,nargs='+')
 parser.add_argument('-addtolist','--attest',action=MangaCLI,nargs='+')
 parser.add_argument('-addtocustom','--aztest',action=MangaCLI,nargs='+')
-
-
+parser.add_argument('-readhistory','--rh',action=MangaCLI,nargs=0)
 
 args = parser.parse_args()
